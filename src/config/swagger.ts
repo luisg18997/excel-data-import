@@ -1,12 +1,12 @@
-require('dotenv').config();
-const swaggerJsDoc = require('swagger-jsdoc');
-const path = require('path')
+import dotenv from 'dotenv';
+import path from 'path';
 
+dotenv.config();
 const dir = path.join(__dirname, '../routes');
 
 // config of documetantion
-module.exports = () => {
-const swaggerOptions = {
+
+const swaggerOptions:Object = {
     swaggerDefinition: {
         openapi: '3.0.1',
         info: {
@@ -18,9 +18,8 @@ const swaggerOptions = {
             servers: [`localhost:${process.env.PORT}`]
         },
     },
-    apis: [dir+'/*routes.js']
-}
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-return swaggerDocs;
+    apis: [dir+'/*.ts']
 };
+
+export default swaggerOptions;
+
