@@ -71,7 +71,7 @@ const routes = (router:any) => {
      *      - Import
      *    description: get  data of by order code
      *    parameters:
-     *      - name: type
+     *      - name: code
      *        in: path
      *        required: true
      *        description: code order
@@ -146,7 +146,7 @@ const routes = (router:any) => {
      *      - Import
      *    description: get  data of by customer code
      *    parameters:
-     *      - name: type
+     *      - name: code
      *        in: path
      *        required: true
      *        description: code customer

@@ -242,7 +242,8 @@ AS $udf$
 			RAISE NOTICE 'code order: % %', i->'order',  i->'product';
             SELECT id INTO prod_id FROM import_data.products where code = i->>'product';
             SELECT id INTO ord_id FROM import_data.orders WHERE code = i->>'order';
-			if NOT EXISTS(select id from import_data.order_products where order_id =order_id AND product_id = product_id)THEN
+			if NOT EXISTS(select id from import_data.order_products where order_id =ord_id AND product_id = prod_id)THEN
+				RAISE NOTICE 'ENTRO a registro';
 				INSERT INTO
 					import_data.order_products(order_id, product_id, sales, discount, quantity, profit)
 				VALUES
