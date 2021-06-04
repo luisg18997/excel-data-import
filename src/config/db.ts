@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import { Pool }  from "pg";
 
 dotenv.config()
-console.log(process.env.DB_USER)
 const conectionString:any = {
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
