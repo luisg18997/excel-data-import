@@ -257,3 +257,220 @@ AS $udf$
         return local_is_successful;
     END;
 $udf$;
+
+-- function of get data by order code
+CREATE OR REPLACE FUNCTION import_data.get_data_by_order(
+    param_order VARCHAR
+)
+RETURNS json
+LANGUAGE 'sql'
+COST 100.0
+AS $BODY$
+		SELECT row_to_json(DATA)
+		FROM (
+			SELECT 
+				ord.id,
+				ord.code,
+				json_build_object('id', cust.id, 'code', cust.code, 'name', cust.name, 'segment', cust.segment) as customer,
+				ord.order_date,
+				ord.ship_date,
+				ord.ship_mode,
+				json_build_object('id', sta.id, 'name', sta.name, 'city', json_build_object('id', cit.id, 'name', cit.name, 'postal_code', cit.postal_code), 'region', sta.region) as state,
+				(SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(PRODUCT)))
+				FROM(
+					SELECT
+						ordPro.id as order_product_id,
+						ordPro.product_id,
+						prod.code as product_code,
+						prod.name as product_name,
+					    jsonb_build_object('id',cat.id, 'name',cat.name, 'subCategory', json_build_object('id', subCat.id,'name',subCat.name)) as category,
+						ordPro.sales,
+						ordPro.discount,
+						ordPro.quantity,
+						ordPro.profit
+					FROM
+						import_data.order_products ordPro
+					INNER JOIN
+						import_data.products prod
+					ON
+						prod.id = ordPro.product_id
+					INNER JOIN
+						import_data.categories cat
+					ON
+						cat.id = prod.category_id
+					INNER JOIN
+						import_data.subcategories subCat
+					ON
+							subCat.id = prod.subcategory_id
+						AND
+							subCat.category_id = cat.id
+                    WHERE  
+                        ord.id = ordPro.order_id
+				)PRODUCT) as order_products
+			FROM   
+				import_data.orders ord
+			INNER JOIN
+				import_data.customers cust 
+			ON 
+					ord.code = param_order
+				AND
+					cust.id = ord.customer_id
+			INNER JOIN
+				import_data.states sta
+			ON
+				ord.state_id = sta.id
+			INNER JOIN
+				import_data.cities cit
+			ON
+					ord.city_id = cit.id
+				AND
+					cit.state_id = sta.id
+		)DATA;
+$BODY$;
+
+-- function get al data
+
+CREATE OR REPLACE FUNCTION import_data.get_all_data_by_order()
+RETURNS json
+LANGUAGE 'sql'
+COST 100.0
+AS $BODY$
+		SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(DATA)))
+		FROM (
+			SELECT 
+				ord.id,
+				ord.code,
+				json_build_object('id', cust.id, 'code', cust.code, 'name', cust.name, 'segment', cust.segment) as customer,
+				ord.order_date,
+				ord.ship_date,
+				ord.ship_mode,
+				json_build_object('id', sta.id, 'name', sta.name, 'city', json_build_object('id', cit.id, 'name', cit.name, 'postal_code', cit.postal_code), 'region', sta.region) as state,
+				(SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(PRODUCT)))
+				FROM(
+					SELECT
+						ordPro.id as order_product_id,
+						ordPro.product_id,
+						prod.code as product_code,
+						prod.name as product_name,
+					    jsonb_build_object('id',cat.id, 'name',cat.name, 'subCategory', json_build_object('id', subCat.id,'name',subCat.name)) as category,
+						ordPro.sales,
+						ordPro.discount,
+						ordPro.quantity,
+						ordPro.profit
+					FROM
+						import_data.order_products ordPro
+					INNER JOIN
+						import_data.products prod
+					ON
+						prod.id = ordPro.product_id
+					INNER JOIN
+						import_data.categories cat
+					ON
+						cat.id = prod.category_id
+					INNER JOIN
+						import_data.subcategories subCat
+					ON
+							subCat.id = prod.subcategory_id
+						AND
+							subCat.category_id = cat.id
+                    WHERE  
+                        ord.id = ordPro.order_id
+				)PRODUCT) as order_products
+			FROM   
+				import_data.orders ord
+			INNER JOIN
+				import_data.customers cust 
+			ON 
+				cust.id = ord.customer_id
+			INNER JOIN
+				import_data.states sta
+			ON
+				ord.state_id = sta.id
+			INNER JOIN
+				import_data.cities cit
+			ON
+					ord.city_id = cit.id
+				AND
+					cit.state_id = sta.id
+		)DATA;
+$BODY$;
+
+
+CREATE OR REPLACE FUNCTION import_data.get_data_by_customer(
+    param_customer VARCHAR
+)
+RETURNS json
+LANGUAGE 'sql'
+COST 100.0
+AS $BODY$
+		SELECT row_to_json(DATA)
+		FROM (
+			SELECT 
+				
+				cust.id,
+                cust.code,
+                cust.name,
+                cust.segment,			
+				(
+                    SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(ORDER_DATA)))
+                    FROM(
+                        SELECT
+                            ord.id,
+                            ord.code,
+                            ord.order_date,
+                            ord.ship_date,
+                            ord.ship_mode,
+                            json_build_object('id', sta.id, 'name', sta.name, 'city', json_build_object('id', cit.id, 'name', cit.name, 'postal_code', cit.postal_code), 'region', sta.region) as state,
+                            (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(PRODUCT_data)))
+                            FROM(
+                                SELECT
+                                    ordPro.id as order_product_id,
+                                    ordPro.product_id,
+                                    prod.code as product_code,
+                                    prod.name as product_name,
+                                    jsonb_build_object('id',cat.id, 'name',cat.name, 'subCategory', json_build_object('id', subCat.id,'name',subCat.name)) as category,
+                                    ordPro.sales,
+                                    ordPro.discount,
+                                    ordPro.quantity,
+                                    ordPro.profit
+                                FROM
+                                    import_data.order_products ordPro
+                                INNER JOIN
+                                    import_data.products prod
+                                ON
+                                    prod.id = ordPro.product_id
+                                INNER JOIN
+                                    import_data.categories cat
+                                ON
+                                    cat.id = prod.category_id
+                                INNER JOIN
+                                    import_data.subcategories subCat
+                                ON
+                                        subCat.id = prod.subcategory_id
+                                    AND
+                                        subCat.category_id = cat.id
+                                WHERE  
+                                    ord.id = ordPro.order_id
+                            )PRODUCT_data) as order_products
+                        FROM
+                            import_data.orders ord
+                        INNER JOIN
+                            import_data.states sta
+                        ON
+                            ord.state_id = sta.id
+                        INNER JOIN
+                            import_data.cities cit
+                        ON
+                                ord.city_id = cit.id
+                            AND
+                                cit.state_id = sta.id
+                        WHERE 
+                            cust.code = param_customer
+                        AND 
+                            cust.id = ord.customer_id
+                    )ORDER_DATA) as orders
+			FROM   
+			 import_data.customers	cust
+             
+		)DATA;
+$BODY$;

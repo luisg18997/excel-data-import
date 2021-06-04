@@ -54,3 +54,30 @@ export const ImportData = async(document:any) => {
         throw error;
     };
 }
+
+export const getOrder = async(code:String) => {
+    try {
+        const order = await Query(util.format("SELECT import_data.get_data_by_order('%s') as result;", code));
+        return order[0].result;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getOrders = async() => {
+    try {
+        const orders = await Query(util.format("SELECT import_data.get_all_data_by_order() as result;",));
+        return orders[0].result;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getCustomer = async(code:String) => {
+    try {
+        const customer = await Query(util.format("SELECT import_data.get_data_by_customer('%s') as result;", code));
+        return customer[0].result;
+    } catch (error) {
+        throw error;
+    }
+}
