@@ -39,12 +39,12 @@ export const ImportData = async(document:any) => {
         ))
         console.table({numCat:categoriesPrev.length, numSubCat:subCategoriesPrev.length, numCus: customersPrev.length, numSta: statesPrev.length, numCit: citiesPrev.length, numPro: productsPrev.length, numOrd: ordersPrev.length, numOrPr: orderProductsPrev.length} );
 
-        // await Query(util.format("SELECT import_data.add_category_subCategory('%s'::JSONB, '%s'::JSONB) as result;", JSON.stringify(categoriesPrev), JSON.stringify(subCategoriesPrev)));
-        // await Query(util.format("SELECT import_data.add_state('%s'::JSONB) as result;", JSON.stringify(statesPrev)));
-        // await Query(util.format("SELECT import_data.add_city('%s'::JSONB) as result;", JSON.stringify(citiesPrev)));
-        // await Query(util.format("SELECT import_data.add_customer('%s'::JSONB) as result;", JSON.stringify(customersPrev)));
-        // await Query(util.format("SELECT import_data.add_product('%s'::JSONB) as result;", JSON.stringify(productsPrev)));
-        // await Query(util.format("SELECT import_data.add_order('%s'::JSONB) as result;", JSON.stringify(ordersPrev)));
+        await Query(util.format("SELECT import_data.add_category_subCategory('%s'::JSONB, '%s'::JSONB) as result;", JSON.stringify(categoriesPrev), JSON.stringify(subCategoriesPrev)));
+        await Query(util.format("SELECT import_data.add_state('%s'::JSONB) as result;", JSON.stringify(statesPrev)));
+        await Query(util.format("SELECT import_data.add_city('%s'::JSONB) as result;", JSON.stringify(citiesPrev)));
+        await Query(util.format("SELECT import_data.add_customer('%s'::JSONB) as result;", JSON.stringify(customersPrev)));
+        await Query(util.format("SELECT import_data.add_product('%s'::JSONB) as result;", JSON.stringify(productsPrev)));
+        await Query(util.format("SELECT import_data.add_order('%s'::JSONB) as result;", JSON.stringify(ordersPrev)));
         await Query(util.format("SELECT import_data.add_order_product('%s'::JSONB) as result;", JSON.stringify(orderProductsPrev)));
         
     
